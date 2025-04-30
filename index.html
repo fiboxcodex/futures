@@ -1,103 +1,100 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Mercati – Finnhub API</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      padding: 20px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #444;
-    }
-    .up {
-      color: #4caf50;
-    }
-    .down {
-      color: #f44336;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Mercati – Finnhub API</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #444;
+    }
+    .up {
+      color: #4caf50;
+    }
+    .down {
+      color: #f44336;
+    }
+  </style>
 </head>
 <body>
-  <h1> Monitor Mercati in Tempo Reale</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Strumento</th>
-        <th>Prezzo</th>
-        <th>Variazione %</th>
-      </tr>
-    </thead>
-    <tbody id="market-data">
-      <!-- I dati verranno inseriti qui -->
-    </tbody>
-  </table>
+  <h1>📈 Monitor Mercati in Tempo Reale</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Strumento</th>
+        <th>Prezzo</th>
+        <th>Variazione %</th>
+      </tr>
+    </thead>
+    <tbody id="market-data">
+      <!-- I dati verranno inseriti qui -->
+    </tbody>
+  </table>
 
-  <script>
-    // → Sostituisci con la tua API Key Finnhub, MANTENENDO le virgolette
-    const API_KEY = 'd091h2pr01qnv4s1nhv0d091h2pr01qnv4s1nhvg';
+  <script>
+    const API_KEY = 'd0943opr01qnv9cgf44gd0943opr01qnv9cgf450';
 
-    // Lista degli strumenti da monitorare
-    const symbols = [
-      { symbol: 'CME:ES1',      name: 'S&P 500 Futures' },
-      { symbol: 'CME:NQ1',      name: 'Nasdaq Futures' },
-      { symbol: 'CME:YM1',      name: 'Dow Jones Futures' },
-      { symbol: 'OANDA:BCO_USD', name: 'Brent Crude' },
-      { symbol: 'OANDA:EUR_USD', name: 'EUR/USD' },
-      { symbol: 'CBOE:VIX',     name: 'Indice VIX' }
-    ];
+    const symbols = [
+      { symbol: 'CME:ES1',      name: 'S&P 500 Futures' },
+      { symbol: 'CME:NQ1',      name: 'Nasdaq Futures' },
+      { symbol: 'CME:YM1',      name: 'Dow Jones Futures' },
+      { symbol: 'OANDA:BCO_USD', name: 'Brent Crude' },
+      { symbol: 'OANDA:EUR_USD', name: 'EUR/USD' },
+      { symbol: 'CBOE:VIX',     name: 'Indice VIX' }
+    ];
 
-    // Funzione per recuperare e mostrare i dati
-    async function fetchData() {
-      const tbody = document.getElementById('market-data');
-      tbody.innerHTML = '';  // Pulisce la tabella
+    async function fetchData() {
+      const tbody = document.getElementById('market-data');
+      tbody.innerHTML = '';
 
-      for (const item of symbols) {
-        try {
-          const response = await fetch(
-            `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(item.symbol)}&token=${API_KEY}`
-          );
-          const data = await response.json();
+      for (const item of symbols) {
+        try {
+          const response = await fetch(
+            `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(item.symbol)}&token=${API_KEY}`
+          );
 
-          // data.c = current price, data.dp = change in percent
-          const price  = data.c  !== null ? data.c.toFixed(2)  : '–';
-          const change = data.dp !== null ? data.dp.toFixed(2) : '0.00';
+          if (!response.ok) throw new Error(`Errore HTTP ${response.status}`);
 
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${item.name}</td>
-            <td>${price}</td>
-            <td class="${change >= 0 ? 'up' : 'down'}">${change}%</td>
-          `;
-          tbody.appendChild(row);
+          const data = await response.json();
 
-        } catch (err) {
-          console.error(`Errore caricamento ${item.symbol}:`, err);
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${item.name}</td>
-            <td colspan="2">Errore caricamento dati</td>
-          `;
-          tbody.appendChild(row);
-        }
-      }
-    }
+          const price  = data.c  !== null ? data.c.toFixed(2)  : '–';
+          const change = data.dp !== null ? data.dp.toFixed(2) : '0.00';
 
-    // Primo fetch e poi aggiornamento ogni 10 secondi
-    fetchData();
-    setInterval(fetchData, 10000);
-  </script>
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${price}</td>
+            <td class="${change >= 0 ? 'up' : 'down'}">${change}%</td>
+          `;
+          tbody.appendChild(row);
+
+        } catch (err) {
+          console.error(`Errore caricamento ${item.symbol}:`, err);
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.name}</td>
+            <td colspan="2">Errore caricamento dati</td>
+          `;
+          tbody.appendChild(row);
+        }
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 10000);
+  </script>
 </body>
 </html>
-
